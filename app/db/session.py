@@ -8,6 +8,12 @@ from app.core.config import settings
 # OR we can fallback to SQLite. (We need SUPABASE_DB_URL for async SQLAlchemy)
 DATABASE_URL = os.environ.get("SUPABASE_DB_URL", "sqlite+aiosqlite:///./dna_platform.db")
 
+# Auto-fix Supabase connection strings to use the async driver
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+elif DATABASE_URL and DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+
 engine = create_async_engine(DATABASE_URL, echo=True, future=True)
 
 async_session = sessionmaker(
